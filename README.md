@@ -14,6 +14,8 @@ Zephyr is a comprehensive RFID-based payment system designed for seamless and re
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
 
+Frontend Link: http://157.173.101.159:9224/topup
+
 ## Features
 
 - **Real-time Card Detection:** Instantly detects RFID cards and communicates their UIDs to the backend.
