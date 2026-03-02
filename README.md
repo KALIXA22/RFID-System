@@ -1,116 +1,86 @@
-# Zephyr: RFID Payment System
+# Zephyr RFID Payment System
 
-Zephyr is a comprehensive RFID-based payment system designed for seamless and real-time transactions. The project integrates a hardware RFID reader, a backend server, and a frontend web application to create a complete and interactive payment experience.
+Zephyr is a real-time RFID payment platform with an ESP8266 reader, Flask backend, MQTT bridge, and a role-based web dashboard for top-up and sales flows.
 
-## Table of Contents
+## LIVE ACCESS URL
 
-- [Features](#features)
-- [System Architecture](#system-architecture)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Hardware Setup](#hardware-setup)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Access](#frontend-access)
-- [Usage](#usage)
-- [Technologies Used](#technologies-used)
+### **[http://157.173.101.159:9224/](http://157.173.101.159:9224/)**
 
 ## Features
 
-- **Real-time Card Detection:** Instantly detects RFID cards and communicates their UIDs to the backend.
-- **Seamless Transactions:** Supports both payment and top-up functionalities through a user-friendly web interface.
-- **Live Dashboard:** A sophisticated frontend that displays real-time updates of card information, balance, and transaction history.
-- **Centralized Logic:** A robust backend server that manages all business logic, user data, and communication between components.
-- **Persistent Data:** Utilizes a SQLite database to store user card information and transaction records.
+- Real-time RFID card scan updates over MQTT + Socket.IO.
+- Role-based dashboards for both `agent` (top-up) and `sales` (payment) flows.
+- Shared live transaction ledger.
+- SQLite persistence for cards, balances, and transactions.
+- Updated premium dashboard UI (responsive, reduced empty space, improved visual polish).
 
-## System Architecture
+## Project Structure
 
-The Zephyr payment system is composed of three main components that work in concert:
+- `Payment/backend/app.py`: Flask app, Socket.IO events, MQTT integration, routes, and transaction logic.
+- `Payment/backend/templates/dashboard.html`: Unified agent/sales dashboard UI.
+- `Payment/backend/templates/admin.html`: Admin data view.
+- `Payment/backend/templates/index.html`, `login.html`, `agent_login.html`, `sales_login.html`: Entry and auth pages.
+- `Payment/ESP_RFID/ESP_RFID.ino`: ESP8266 + MFRC522 firmware.
 
-### 1. Hardware (ESP8266 RFID Reader)
+## Current Backend Behavior
 
-The hardware component is responsible for the physical interaction with the RFID cards.
+- Host/port: `0.0.0.0:9224`
+- MQTT broker: `broker.benax.rw`
+- Topics: `rfid/team_zephyr/card/status`, `rfid/team_zephyr/card/pay`, `rfid/team_zephyr/card/topup`
+- Default login credentials: Agent `agent` / `agentpass`, Sales `sales` / `salespass`
 
-- **Device:** ESP8266
-- **RFID Module:** MFRC522
-- **Core Functionality:**
-    - Establishes a connection to a Wi-Fi network and an MQTT broker.
-    - Scans for RFID cards and publishes the card's UID to a designated MQTT topic.
-    - Subscribes to MQTT topics to receive real-time updates for payments and top-ups.
-    - Capable of writing updated balance information back to the RFID card.
+## Routes
 
-The source code for the hardware is located in the `ESP_RFID/ESP_RFID.ino` file.
+- `GET /`: Landing page
+- `GET /login`: Login selector
+- `GET /login/agent`: Agent login page
+- `POST /login/agent`: Agent authentication
+- `GET /login/sales`: Sales login page
+- `POST /login/sales`: Sales authentication
+- `GET /topup-dashboard`: Agent dashboard
+- `GET /payment-dashboard`: Sales dashboard
+- `GET /admin`: Admin page
+- `POST /topup`: Top-up transaction
+- `POST /pay`: Payment transaction
 
-### 2. Backend (Flask Server)
+## Local Setup
 
-The backend is the heart of the system, orchestrating all operations and data flow.
+1. Go to the project root:
+```bash
+cd Payment
+```
 
-- **Framework:** Flask
-- **Database:** SQLite
-- **Real-time Communication:** Employs MQTT for hardware communication and Socket.IO for frontend updates.
-- **Core Functionality:**
-    - Manages user card data and balances within a SQLite database.
-    - Processes all payment and top-up requests.
-    - Acts as a bridge between the RFID reader and the web application.
-    - Pushes live updates to the frontend dashboard.
+2. Create and activate a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows PowerShell
+```
 
-The backend application logic is defined in `backend/app.py`.
+3. Install dependencies:
+```bash
+pip install -U pip
+pip install flask flask-socketio flask-cors flask-sqlalchemy paho-mqtt
+```
 
-### 3. Frontend (Web Application)
+4. Run backend:
+```bash
+python backend/app.py
+```
 
-The frontend provides a rich and interactive user interface for the payment system.
+5. Open in browser:
+- `http://157.173.101.159:9224/`
 
-- **Styling and Frameworks:** Built with Tailwind CSS and leverages Socket.IO for real-time data synchronization.
-- **Core Functionality:**
-    - Presents a "museum-themed" dashboard for a unique user experience.
-    - Facilitates topping up RFID cards and making payments for a curated list of products.
-    - Dynamically updates to show the current card UID, balance, and a ledger of transactions.
+## Hardware Notes
 
-The frontend is a single-page application, with its structure and code in `backend/templates/dashboard.html`.
+- Open `Payment/ESP_RFID/ESP_RFID.ino` in Arduino IDE.
+- Install libraries: `ESP8266WiFi`, `PubSubClient`, `MFRC522`, `ArduinoJson`.
+- Set Wi-Fi and team configuration, then flash the ESP8266.
 
-## Getting Started
+## Tech Stack
 
-To get the Zephyr payment system up and running, follow the setup instructions for each component.
-
-### Prerequisites
-
-- Arduino IDE for the hardware setup.
-- Python 3.x and `pip` for the backend server.
-- A modern web browser for the frontend application.
-
-### Hardware Setup
-
-1.  Launch the Arduino IDE and open the `ESP_RFID/ESP_RFID.ino` file.
-2.  Install the necessary libraries from the Arduino Library Manager: `ESP8266WiFi`, `PubSubClient`, `MFRC522`, and `ArduinoJson`.
-3.  Modify the sketch to include your Wi-Fi credentials (`WIFI_SSID` and `WIFI_PASS`) and your `TEAM_ID`.
-4.  Connect your ESP8266 and upload the sketch.
-
-### Backend Setup
-
-1.  Open your terminal and navigate to the `Payment` directory.
-2.  Install the required Python packages by running:
-    ```bash
-    pip install Flask Flask-SocketIO Flask-Cors Flask-SQLAlchemy paho-mqtt
-    ```
-3.  Start the backend server with the following command:
-    ```bash
-    python backend/app.py
-    ```
-
-### Frontend Access
-
-1.  Once the backend server is running, open your web browser.
-2.  Navigate to `http://157.173.101.159:9224/topup` to access the Zephyr dashboard.
-
-## Usage
-
-- **Card Scanning:** Simply bring an RFID card near the MFRC522 reader. The card's UID and current balance will appear on the dashboard.
-- **Topping Up:** Use the "Authorize Deposit" section to add funds to the scanned card.
-- **Making a Payment:** Select a product from the gallery, and click "Acquire Asset" to complete the purchase. The transaction will be reflected in the ledger.
-
-## Technologies Used
-
-- **Hardware:** ESP8266, MFRC522 RFID Module
-- **Backend:** Python, Flask, Flask-SocketIO, Flask-SQLAlchemy
-- **Frontend:** HTML, Tailwind CSS, JavaScript, Socket.IO
-- **Communication:** MQTT, WebSockets
-- **Database:** SQLite
+- Backend: Flask, Flask-SocketIO, Flask-SQLAlchemy
+- Frontend: HTML, Tailwind CSS, JavaScript, Socket.IO
+- Messaging: MQTT
+- Database: SQLite
+- Hardware: ESP8266 + MFRC522
