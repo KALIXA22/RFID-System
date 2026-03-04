@@ -3,188 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEPHYR | Consolidated Dashboard</title>
+    <title>ZEPHYR | Consolidated Archive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@200;400;600&family=JetBrains+Mono:wght@100&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #d4af37;
+            --gold-soft: #b89b5e;
             --matte-black: #0d0d0d;
             --border-white: rgba(255, 255, 255, 0.08);
+            --gold-glow: rgba(212, 175, 55, 0.3);
         }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--matte-black);
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--matte-black); 
             color: #d1d5db;
-            background-image: radial-gradient(circle at 15% 10%, rgba(212, 175, 55, 0.09), transparent 36%), url("https://www.transparenttextures.com/patterns/dark-matter.png");
+            background-image: url("https://www.transparenttextures.com/patterns/dark-matter.png");
+            background-attachment: fixed;
         }
-        .serif-display { font-family: 'Cormorant Garamond', serif; }
-        .mono-elegant { font-family: 'JetBrains Mono', monospace; letter-spacing: 0.18em; font-size: 0.65rem; }
-        .panel { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-white); }
-        .panel table tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.01); }
+
+        .serif-display { font-family: 'Cormorant Garamond', serif; font-weight: 300; }
+        .mono-elegant { font-family: 'JetBrains Mono', monospace; letter-spacing: 0.2em; font-size: 0.65rem; }
+        .tabular { font-variant-numeric: tabular-nums; }
+
+        /* --- THE BRILLIANT SHIMMER EFFECT --- */
+        .museum-card, .kpi-card {
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.01);
+            border: 0.6px solid rgba(184, 155, 94, 0.5); /* Softer border */
+            backdrop-filter: blur(12px);
+            border-radius: 4px;
+            transition: all 0.5s ease;
+        }
+
+        /* The Moving Metallic Streak (Brilliance) */
+        .museum-card::after, .kpi-card::after {
+            content: "";
+            position: absolute;
+            top: -150%;
+            left: -150%;
+            width: 400%;
+            height: 400%;
+            background: linear-gradient(
+                45deg,
+                transparent 45%,
+                rgba(212, 175, 55, 0.018) 48%,
+                rgba(255, 255, 255, 0.045) 50%,
+                rgba(212, 175, 55, 0.018) 52%,
+                transparent 55%
+            );
+            animation: metallic-shine 18s infinite linear;
+            pointer-events: none;
+            transform: rotate(25deg);
+        }
+
+        @keyframes metallic-shine {
+            0% { transform: translateX(-50%) translateY(-50%) rotate(25deg); }
+            100% { transform: translateX(50%) translateY(50%) rotate(25deg); }
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.02) 0%, rgba(0, 0, 0, 0.4) 100%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .gold-underline {
+            position: relative;
+            display: inline-block;
+        }
+        .gold-underline::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 1px;
+            bottom: -4px; left: 0;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .btn-classic {
+            border: 1px solid var(--gold-soft);
+            color: var(--gold-soft);
+            transition: all 0.4s ease;
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+        .btn-classic:hover {
+            background: var(--gold-soft);
+            color: black;
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        .table-container::-webkit-scrollbar { width: 2px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--gold-soft); }
+
+        tr { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
+        tr:hover { background: rgba(212, 175, 55, 0.04) !important; }
+
+        .kpi-value { 
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.18);
+            color: white;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.8s ease forwards; }
     </style>
 </head>
-<body class="min-h-screen pb-16">
-    <header class="px-6 md:px-12 py-8 border-b border-white/10 flex items-center justify-between">
+<body class="min-h-screen pb-20">
+
+    <header class="w-full py-10 px-6 md:px-12 flex justify-between items-end border-b border-white/5 sticky top-0 z-20 bg-black/80 backdrop-blur-md">
         <div>
-            <h1 class="serif-display text-4xl text-white uppercase tracking-widest">Consolidated Dashboard</h1>
-            <p class="mono-elegant text-gray-500 mt-2">BALANCES_TOPUPS_TRANSACTIONS</p>
+            <div class="flex items-center gap-3 mb-2">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-soft opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-gold-soft"></span>
+                </span>
+                <p class="mono-elegant text-gray-500">SECURE_VAULT_LIVE</p>
+            </div>
+            <h1 class="serif-display text-4xl tracking-[0.2em] text-white uppercase">Consolidated <span class="italic font-light text-gray-500">Archive</span></h1>
         </div>
-        <a href="{% if session['role'] == 'agent' %}/topup-dashboard{% else %}/payment-dashboard{% endif %}" class="mono-elegant text-gray-300 border border-white/15 px-4 py-2 hover:text-white transition-all">
-            BACK_TO_OPERATIONS
-        </a>
+        <div class="flex items-center gap-8 pb-1">
+            <a href="{% if session['role'] == 'agent' %}/topup-dashboard{% else %}/payment-dashboard{% endif %}" class="mono-elegant text-gray-500 hover:text-white transition-colors">
+                EXIT_TO_VAULT
+            </a>
+            <a href="/logout" class="btn-classic px-8 py-2 text-[10px]">Logout</a>
+        </div>
     </header>
 
-    <main class="container mx-auto px-6 md:px-12 mt-10 max-w-[1700px]">
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="panel p-6">
-                <p class="mono-elegant text-gray-500">TOTAL_BALANCES</p>
-                <p id="total-balances" class="serif-display text-4xl text-white mt-4">{{ "{:,}".format(total_balances) }} <span class="text-lg">RWF</span></p>
+    <main class="container mx-auto px-6 md:px-12 mt-16 max-w-[1600px]">
+        
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20 fade-up">
+            <div class="kpi-card p-12 text-center">
+                <p class="mono-elegant text-gray-600 mb-4">AGGREGATE_BALANCES</p>
+                <h3 id="total-balances" class="serif-display text-5xl kpi-value tabular">{{ "{:,}".format(total_balances) }} <span class="text-lg italic text-gold-soft">RWF</span></h3>
             </div>
-            <div class="panel p-6">
-                <p class="mono-elegant text-gray-500">TOTAL_TOPUPS</p>
-                <p id="total-topups" class="serif-display text-4xl text-white mt-4">{{ "{:,}".format(total_topups) }} <span class="text-lg">RWF</span></p>
+            <div class="kpi-card p-12 text-center">
+                <p class="mono-elegant text-gray-600 mb-4">LIFETIME_DEPOSITS</p>
+                <h3 id="total-topups" class="serif-display text-5xl kpi-value tabular">{{ "{:,}".format(total_topups) }} <span class="text-lg italic text-gold-soft">RWF</span></h3>
             </div>
-            <div class="panel p-6">
-                <p class="mono-elegant text-gray-500">TOTAL_PAYMENTS</p>
-                <p id="total-payments" class="serif-display text-4xl text-white mt-4">{{ "{:,}".format(total_payments) }} <span class="text-lg">RWF</span></p>
-            </div>
-        </section>
-
-        <section class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <div class="panel overflow-hidden">
-                <div class="p-4 border-b border-white/10">
-                    <h2 class="serif-display text-2xl text-white">Balances</h2>
-                </div>
-                <div class="max-h-[560px] overflow-y-auto">
-                    <table class="w-full text-left">
-                        <thead class="mono-elegant text-gray-400 bg-white/5">
-                            <tr>
-                                <th class="p-4 font-thin">UID</th>
-                                <th class="p-4 font-thin text-right">BALANCE</th>
-                            </tr>
-                        </thead>
-                        <tbody id="balances-body" class="text-gray-200">
-                            {% for user in users %}
-                            <tr data-uid="{{ user.uid }}">
-                                <td class="p-4">{{ user.uid }}</td>
-                                <td class="p-4 text-right balance-cell">{{ "{:,}".format(user.balance) }} RWF</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="panel overflow-hidden">
-                <div class="p-4 border-b border-white/10">
-                    <h2 class="serif-display text-2xl text-white">Top-Ups</h2>
-                </div>
-                <div class="max-h-[560px] overflow-y-auto">
-                    <table class="w-full text-left">
-                        <thead class="mono-elegant text-gray-400 bg-white/5">
-                            <tr>
-                                <th class="p-4 font-thin">TIME</th>
-                                <th class="p-4 font-thin">UID</th>
-                                <th class="p-4 font-thin text-right">AMOUNT</th>
-                            </tr>
-                        </thead>
-                        <tbody id="topups-body" class="text-gray-200">
-                            {% for tx in topups %}
-                            <tr>
-                                <td class="p-4">{{ tx.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                <td class="p-4">{{ tx.uid }}</td>
-                                <td class="p-4 text-right text-green-500">+{{ "{:,}".format(tx.amount) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="panel overflow-hidden">
-                <div class="p-4 border-b border-white/10">
-                    <h2 class="serif-display text-2xl text-white">All Transactions</h2>
-                </div>
-                <div class="max-h-[560px] overflow-y-auto">
-                    <table class="w-full text-left">
-                        <thead class="mono-elegant text-gray-400 bg-white/5">
-                            <tr>
-                                <th class="p-4 font-thin">TIME</th>
-                                <th class="p-4 font-thin">TYPE</th>
-                                <th class="p-4 font-thin">UID</th>
-                                <th class="p-4 font-thin text-right">AMOUNT</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactions-body" class="text-gray-200">
-                            {% for tx in transactions %}
-                            <tr>
-                                <td class="p-4">{{ tx.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                <td class="p-4">{{ tx.type }}</td>
-                                <td class="p-4">{{ tx.uid }}</td>
-                                <td class="p-4 text-right {{ 'text-green-500' if tx.type == 'TOP-UP' else 'text-white' }}">
-                                    {{ '+' if tx.type == 'TOP-UP' else '-' }}{{ "{:,}".format(tx.amount) }}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="kpi-card p-12 text-center">
+                <p class="mono-elegant text-gray-600 mb-4">TOTAL_EXPENDITURE</p>
+                <h3 id="total-payments" class="serif-display text-5xl kpi-value tabular">{{ "{:,}".format(total_payments) }} <span class="text-lg italic text-gold-soft">RWF</span></h3>
             </div>
         </section>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-12">
+            
+            <div class="xl:col-span-4 space-y-12 fade-up" style="animation-delay: 0.2s;">
+                <div class="museum-card">
+                    <div class="p-6 border-b border-white/5 bg-white/[0.02]">
+                        <h2 class="serif-display text-xl text-white italic tracking-widest uppercase">Active Liquidity</h2>
+                    </div>
+                    <div class="max-h-[300px] overflow-y-auto table-container">
+                        <table class="w-full text-left">
+                            <tbody id="balances-body" class="serif-display text-gray-300">
+                                {% for user in users %}
+                                <tr data-uid="{{ user.uid }}">
+                                    <td class="p-4 text-xs font-mono text-gray-500 tracking-tighter uppercase">{{ user.uid }}</td>
+                                    <td class="p-4 text-right tabular balance-cell text-white">{{ "{:,}".format(user.balance) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="museum-card">
+                    <div class="p-6 border-b border-white/5 bg-white/[0.02]">
+                        <h2 class="serif-display text-xl text-white italic tracking-widest uppercase">Recent Influx</h2>
+                    </div>
+                    <div class="max-h-[300px] overflow-y-auto table-container">
+                        <table class="w-full text-left">
+                            <tbody id="topups-body" class="serif-display text-gray-300">
+                                {% for tx in topups %}
+                                <tr>
+                                    <td class="p-4 text-[10px] mono-elegant text-gray-600">{{ tx.timestamp.strftime('%H:%M') }}</td>
+                                    <td class="p-4 text-xs font-mono text-gray-500">{{ tx.uid }}</td>
+                                    <td class="p-4 text-right tabular text-gold-soft">+{{ "{:,}".format(tx.amount) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-8 fade-up" style="animation-delay: 0.4s;">
+                <div class="museum-card">
+                    <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                        <h2 class="serif-display text-3xl text-white italic gold-underline">Master Ledger</h2>
+                        <span class="mono-elegant text-gray-600">ENCRYPTED_ARCHIVE_LOG</span>
+                    </div>
+                    <div class="max-h-[700px] overflow-y-auto table-container">
+                        <table class="w-full text-left">
+                            <thead class="sticky top-0 z-10 bg-black/95 mono-elegant text-gray-600">
+                                <tr>
+                                    <th class="p-6 font-thin">TIMESTAMP</th>
+                                    <th class="p-6 font-thin">TYPE</th>
+                                    <th class="p-6 font-thin">SIGNATURE</th>
+                                    <th class="p-6 font-thin text-right">VALUATION</th>
+                                    <th class="p-6 font-thin text-center">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-body" class="serif-display text-lg text-gray-300">
+                                {% for tx in transactions %}
+                                <tr data-tx-id="{{ tx.id }}" data-type="{{ tx.type }}" data-uid="{{ tx.uid }}" data-amount="{{ tx.amount }}" data-time="{{ tx.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}">
+                                    <td class="p-6 text-[11px] mono-elegant text-gray-600">{{ tx.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td class="p-6 italic text-sm text-gray-400">{{ tx.type }}</td>
+                                    <td class="p-6 text-xs font-mono tracking-tighter text-gray-500 uppercase">{{ tx.uid }}</td>
+                                    <td class="p-6 text-right tabular {{ 'text-gold-soft' if tx.type == 'TOP-UP' else 'text-white' }}">
+                                        {{ '+' if tx.type == 'TOP-UP' else '-' }}{{ "{:,}".format(tx.amount) }}
+                                    </td>
+                                    <td class="p-6 text-center">
+                                        <button class="btn-classic px-4 py-1 text-[9px]" onclick="downloadReceiptFromRow(this)">PDF</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
         const socket = io(`http://${window.location.hostname}:9224`);
 
-        function addTransaction(data) {
-            const txRow = document.createElement('tr');
-            txRow.innerHTML = `
-                <td class="p-4">${new Date().toISOString().slice(0, 19).replace('T', ' ')}</td>
-                <td class="p-4">${data.type}</td>
-                <td class="p-4">${data.uid}</td>
-                <td class="p-4 text-right ${data.type === 'TOP-UP' ? 'text-green-500' : 'text-white'}">
-                    ${data.type === 'TOP-UP' ? '+' : '-'}${Number(data.amount).toLocaleString()}
-                </td>
-            `;
-            document.getElementById('transactions-body').prepend(txRow);
+        function resizeKpiCardValues() {
+            ['total-balances', 'total-topups', 'total-payments'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
+                const len = raw.length;
+                let size = '3rem';
+                if (len >= 18) size = '2.15rem';
+                else if (len >= 14) size = '2.45rem';
+                else if (len >= 11) size = '2.75rem';
+                el.style.fontSize = size;
+                el.style.lineHeight = '1.05';
+            });
         }
 
-        function addTopup(data) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="p-4">${new Date().toISOString().slice(0, 19).replace('T', ' ')}</td>
-                <td class="p-4">${data.uid}</td>
-                <td class="p-4 text-right text-green-500">+${Number(data.amount).toLocaleString()}</td>
-            `;
-            document.getElementById('topups-body').prepend(row);
+        // PDF Generation Logic
+        function downloadReceiptPdf(receipt) {
+            const jspdfLib = window.jspdf;
+            if (!jspdfLib || !jspdfLib.jsPDF) return;
+
+            const { jsPDF } = jspdfLib;
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            
+            doc.setFillColor(13, 13, 13);
+            doc.rect(0, 0, 595, 842, 'F');
+            
+            doc.setTextColor(212, 175, 55);
+            doc.setFont('times', 'italic');
+            doc.setFontSize(24);
+            doc.text('ZEPHYR HERITAGE ARCHIVE', 50, 60);
+            
+            doc.setDrawColor(184, 155, 94);
+            doc.line(50, 75, 545, 75);
+
+            doc.setTextColor(150, 150, 150);
+            doc.setFont('courier', 'normal');
+            doc.setFontSize(10);
+            let y = 120;
+            const logLine = (label, val) => {
+                doc.text(`${label.padEnd(25)}: ${val}`, 50, y);
+                y += 25;
+            };
+
+            logLine('ID_REFERENCE', receipt.transaction_id);
+            logLine('DATE_TIME', receipt.timestamp);
+            logLine('TYPE', receipt.type);
+            logLine('AUTH_SIGNATURE', receipt.uid);
+            logLine('VALUATION_RWF', `${receipt.type === 'TOP-UP' ? '+' : '-'}${Number(receipt.amount).toLocaleString()}`);
+            
+            doc.save(`ZEPHYR_LOG_${receipt.transaction_id}.pdf`);
         }
 
-        function upsertBalance(data) {
+        function downloadReceiptFromRow(buttonEl) {
+            const row = buttonEl.closest('tr');
+            if (!row) return;
+            downloadReceiptPdf({
+                transaction_id: row.dataset.txId || 'REF-N/A',
+                timestamp: row.dataset.time || '',
+                type: row.dataset.type || 'UNKNOWN',
+                uid: row.dataset.uid || 'UNKNOWN',
+                amount: row.dataset.amount || 0
+            });
+        }
+
+        // Live UI Updates via Socket.IO
+        socket.on('update_ui', (data) => {
+            // Update Balance Row
             const existing = document.querySelector(`#balances-body tr[data-uid="${data.uid}"]`);
             if (existing) {
-                existing.querySelector('.balance-cell').innerText = `${Number(data.balance).toLocaleString()} RWF`;
-                return;
+                existing.querySelector('.balance-cell').innerText = Number(data.balance).toLocaleString();
+                existing.classList.add('bg-gold-soft/10');
+                setTimeout(() => existing.classList.remove('bg-gold-soft/10'), 2000);
             }
-            const row = document.createElement('tr');
-            row.setAttribute('data-uid', data.uid);
-            row.innerHTML = `
-                <td class="p-4">${data.uid}</td>
-                <td class="p-4 text-right balance-cell">${Number(data.balance).toLocaleString()} RWF</td>
-            `;
-            document.getElementById('balances-body').prepend(row);
-        }
-
-        socket.on('update_ui', (data) => {
-            upsertBalance(data);
+            
+            // Add to Ledger
             if (data.type === 'TOP-UP' || data.type === 'PAYMENT') {
-                addTransaction(data);
+                const txRow = document.createElement('tr');
+                txRow.className = "fade-up";
+                txRow.innerHTML = `
+                    <td class="p-6 text-[11px] mono-elegant text-gray-600">${new Date().toLocaleString()}</td>
+                    <td class="p-6 italic text-sm text-gray-400">${data.type}</td>
+                    <td class="p-6 text-xs font-mono text-gray-500 uppercase">${data.uid}</td>
+                    <td class="p-6 text-right tabular ${data.type === 'TOP-UP' ? 'text-gold-soft' : 'text-white'}">
+                        ${data.type === 'TOP-UP' ? '+' : '-'}${Number(data.amount).toLocaleString()}
+                    </td>
+                    <td class="p-6 text-center"><button class="btn-classic px-4 py-1 text-[9px]" onclick="downloadReceiptFromRow(this)">PDF</button></td>
+                `;
+                document.getElementById('transactions-body').prepend(txRow);
+                
+                // Update Top Totals (Assuming data object contains updated totals)
+                if(data.total_balances) document.getElementById('total-balances').innerText = data.total_balances.toLocaleString();
             }
-            if (data.type === 'TOP-UP') {
-                addTopup(data);
-            }
+            resizeKpiCardValues();
         });
+
+        resizeKpiCardValues();
     </script>
 </body>
 </html>

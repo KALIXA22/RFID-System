@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion # Added for v2 compatibility
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 app = Flask(__name__, template_folder='templates')
@@ -17,19 +17,22 @@ db = SQLAlchemy(app)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
+def utc_now():
+    return datetime.now(timezone.utc)
+
 # --- MODELS ---
 class UserCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(50), unique=True, nullable=False)
     balance = db.Column(db.Integer, default=0)
-    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=utc_now)
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(20))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=utc_now)
 
 with app.app_context():
     db.create_all()
@@ -56,7 +59,7 @@ def on_message(client, userdata, msg):
                 if not card:
                     card = UserCard(uid=uid, balance=0)
                     db.session.add(card)
-                card.last_seen = datetime.utcnow()
+                card.last_seen = utc_now()
                 db.session.commit()
                 socketio.emit('update_ui', {
                     "uid": uid,
@@ -116,6 +119,11 @@ def login_sales():
         return redirect(url_for('payment_dashboard'))
     else:
         return redirect(url_for('sales_login'))
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 @app.route('/topup-dashboard')
 def topup_dashboard():
@@ -199,13 +207,21 @@ def topup():
         card = UserCard(uid=uid, balance=0)
         db.session.add(card)
     card.balance += amount
-    db.session.add(Transaction(uid=uid, amount=amount, type="TOP-UP"))
+    tx = Transaction(uid=uid, amount=amount, type="TOP-UP")
+    db.session.add(tx)
     db.session.commit()
     mqtt_client.publish(TOPIC_TOPUP, json.dumps({"uid": uid, "new_balance": card.balance}))
-    res_data = {"uid": uid, "balance": card.balance, "amount": amount, "type": "TOP-UP", "time": datetime.now().strftime("%H:%M:%S")}
+    res_data = {
+        "uid": uid,
+        "balance": card.balance,
+        "amount": amount,
+        "type": "TOP-UP",
+        "time": datetime.now().strftime("%H:%M:%S"),
+        "transaction_id": tx.id
+    }
     socketio.emit('update_ui', res_data)
     return jsonify({"status": "success", "new_balance": card.balance}), 200
 
 if __name__ == '__main__':
     # UPDATED PORT
-    socketio.run(app, host='0.0.0.0', port=9224, debug=True)
+    socketio.run(app, host='0.0.0.0', port=9224, debug=True, allow_unsafe_werkzeug=True)

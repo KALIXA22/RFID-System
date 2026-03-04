@@ -358,26 +358,158 @@
                 <head>
                     <title>Payment Receipt</title>
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; color: #111; }
-                        .wrap { border: 1px solid #ddd; padding: 16px; }
-                        h2 { margin-top: 0; }
-                        .row { display: flex; justify-content: space-between; margin: 8px 0; }
-                        .small { color: #666; font-size: 12px; }
-                        .total { font-weight: bold; border-top: 1px solid #ddd; margin-top: 12px; padding-top: 10px; }
-                        button { margin-top: 16px; padding: 8px 14px; }
+                        :root {
+                            --paper: #f4efe2;
+                            --ink: #17150f;
+                            --gold: #b08a3c;
+                            --gold-dark: #87641f;
+                            --line: rgba(23, 21, 15, 0.14);
+                        }
+                        * { box-sizing: border-box; }
+                        body {
+                            margin: 0;
+                            padding: 26px 12px;
+                            font-family: "Georgia", "Times New Roman", serif;
+                            color: var(--ink);
+                            background:
+                                radial-gradient(circle at 20% 0%, rgba(176, 138, 60, 0.28), transparent 38%),
+                                radial-gradient(circle at 90% 100%, rgba(135, 100, 31, 0.2), transparent 45%),
+                                #0d0d0d;
+                        }
+                        .ticket {
+                            width: 360px;
+                            margin: 0 auto;
+                            border: 1px solid rgba(176, 138, 60, 0.5);
+                            background:
+                                linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04)),
+                                var(--paper);
+                            box-shadow: 0 22px 42px rgba(0, 0, 0, 0.45);
+                            border-radius: 18px;
+                            overflow: hidden;
+                        }
+                        .head {
+                            padding: 22px 22px 16px;
+                            border-bottom: 1px dashed var(--line);
+                            background: linear-gradient(135deg, rgba(176, 138, 60, 0.22), rgba(255, 255, 255, 0));
+                        }
+                        .brand {
+                            margin: 0;
+                            font-size: 26px;
+                            letter-spacing: 2px;
+                            text-transform: uppercase;
+                        }
+                        .sub {
+                            margin-top: 4px;
+                            font-size: 11px;
+                            letter-spacing: 1.8px;
+                            text-transform: uppercase;
+                            opacity: 0.7;
+                        }
+                        .meta {
+                            margin-top: 12px;
+                            font-size: 12px;
+                            line-height: 1.55;
+                            opacity: 0.82;
+                        }
+                        .amount {
+                            margin: 16px 22px 0;
+                            padding: 14px 16px;
+                            border: 1px solid rgba(135, 100, 31, 0.32);
+                            border-radius: 10px;
+                            background: rgba(255, 255, 255, 0.5);
+                            text-align: center;
+                        }
+                        .amount .label {
+                            font-size: 11px;
+                            letter-spacing: 1.8px;
+                            text-transform: uppercase;
+                            opacity: 0.7;
+                        }
+                        .amount .value {
+                            font-size: 30px;
+                            font-weight: 700;
+                            margin-top: 4px;
+                            color: var(--gold-dark);
+                        }
+                        .body {
+                            padding: 16px 22px 22px;
+                        }
+                        .row {
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 10px;
+                            padding: 9px 0;
+                            border-bottom: 1px dotted var(--line);
+                            font-size: 14px;
+                        }
+                        .row:last-child {
+                            border-bottom: none;
+                        }
+                        .k {
+                            opacity: 0.75;
+                        }
+                        .v {
+                            font-weight: 700;
+                            text-align: right;
+                            max-width: 58%;
+                            word-break: break-word;
+                        }
+                        .foot {
+                            margin-top: 14px;
+                            font-size: 11px;
+                            opacity: 0.65;
+                            text-align: center;
+                            text-transform: uppercase;
+                            letter-spacing: 1.3px;
+                        }
+                        .actions {
+                            padding: 0 22px 20px;
+                        }
+                        button {
+                            width: 100%;
+                            border: 1px solid rgba(135, 100, 31, 0.45);
+                            background: linear-gradient(180deg, #d8be80, #b08a3c);
+                            color: #12110c;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                            border-radius: 10px;
+                            padding: 12px 14px;
+                            cursor: pointer;
+                        }
+                        @media print {
+                            body { background: #fff; padding: 0; }
+                            .ticket {
+                                box-shadow: none;
+                                border-color: #bbb;
+                                width: 100%;
+                                border-radius: 0;
+                            }
+                            .actions { display: none; }
+                        }
                     </style>
                 </head>
                 <body>
-                    <div class="wrap">
-                        <h2>ZEPHYR RECEIPT</h2>
-                        <div class="small">Transaction #${receipt.transaction_id}</div>
-                        <div class="small">${receipt.timestamp}</div>
-                        <div class="row"><span>Card UID:</span><strong>${receipt.uid}</strong></div>
-                        <div class="row"><span>Item:</span><strong>${receipt.item}</strong></div>
-                        <div class="row"><span>Quantity:</span><strong>${receipt.quantity}</strong></div>
-                        <div class="row total"><span>Paid:</span><strong>${Number(receipt.amount).toLocaleString()} RWF</strong></div>
-                        <div class="row"><span>Remaining Balance:</span><strong>${Number(receipt.remaining_balance).toLocaleString()} RWF</strong></div>
-                        <button onclick="window.print()">Print Receipt</button>
+                    <div class="ticket">
+                        <div class="head">
+                            <h2 class="brand">Zephyr</h2>
+                            <div class="sub">Payment Receipt</div>
+                            <div class="meta">TX #${receipt.transaction_id}<br>${receipt.timestamp}</div>
+                        </div>
+                        <div class="amount">
+                            <div class="label">Amount Paid</div>
+                            <div class="value">${Number(receipt.amount).toLocaleString()} RWF</div>
+                        </div>
+                        <div class="body">
+                            <div class="row"><span class="k">Card UID</span><span class="v">${receipt.uid}</span></div>
+                            <div class="row"><span class="k">Item</span><span class="v">${receipt.item}</span></div>
+                            <div class="row"><span class="k">Quantity</span><span class="v">${receipt.quantity}</span></div>
+                            <div class="row"><span class="k">Remaining Balance</span><span class="v">${Number(receipt.remaining_balance).toLocaleString()} RWF</span></div>
+                            <div class="foot">Verified by Zephyr Transaction Gateway</div>
+                        </div>
+                        <div class="actions">
+                            <button onclick="window.print()">Print Receipt</button>
+                        </div>
                     </div>
                 </body>
                 </html>
