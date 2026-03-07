@@ -9,8 +9,8 @@ from datetime import datetime, timezone
 import os
 
 app = Flask(__name__, template_folder='templates')
-app.config['SECRET_KEY'] = 'zephyr_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///zephyr.db'
+app.config['SECRET_KEY'] = 'kaliz_secret_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kaliz.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -38,7 +38,7 @@ with app.app_context():
     db.create_all()
 
 # --- CONFIGURATION (UPDATED) ---
-TEAM_ID = "team_zephyr"
+TEAM_ID = "team_kaliz"
 MQTT_BROKER = "broker.benax.rw"
 TOPIC_STATUS = f"rfid/{TEAM_ID}/card/status"
 TOPIC_PAY = f"rfid/{TEAM_ID}/card/pay"
@@ -224,4 +224,4 @@ def topup():
 
 if __name__ == '__main__':
     # UPDATED PORT
-    socketio.run(app, host='0.0.0.0', port=9224, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=9243, debug=True, allow_unsafe_werkzeug=True)

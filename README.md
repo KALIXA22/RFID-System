@@ -1,90 +1,113 @@
-# Zephyr RFID Payment System
+KALIZ III – Automated Asset Vault System
 
-Zephyr is a real-time RFID payment platform with an ESP8266 reader, Flask backend, MQTT bridge, and a role-based web dashboard for top-up and sales flows.
 
-## LIVE ACCESS URL
 
-## Features
 
-- Real-time RFID card scan updates over MQTT + Socket.IO.
-- Role-based dashboards for both `agent` (top-up) and `sales` (payment) flows.
-- Shared live transaction ledger.
-- SQLite persistence for cards, balances, and transactions.
-- Updated premium dashboard UI (responsive, reduced empty space, improved visual polish).
 
-## Project Structure
 
-- `Payment/backend/app.py`: Flask app, Socket.IO events, MQTT integration, routes, and transaction logic.
-- `Payment/backend/templates/dashboard.html`: Unified agent/sales dashboard UI.
-- `Payment/backend/templates/admin.html`: Admin data view.
-- `Payment/backend/templates/index.html`, `login.html`, `agent_login.html`, `sales_login.html`: Entry and auth pages.
-- `Payment/ESP_RFID/ESP_RFID.ino`: ESP8266 + MFRC522 firmware.
+KALIZ III is a secure, real-time asset management platform designed to monitor, track, and manage high-value items. It features a modern dashboard, role-based access, and integrated transaction tracking.
 
-## Current Backend Behavior
+🚀 Features
 
-- Host/port: `0.0.0.0:9224`
-- MQTT broker: `broker.benax.rw`
-- Topics: `rfid/team_zephyr/card/status`, `rfid/team_zephyr/card/pay`, `rfid/team_zephyr/card/topup`
-- Default login credentials: Agent `agent` / `agentpass`, Sales `sales` / `salespass`
-- SQLite URI in code: `sqlite:///zephyr.db`
+Current Exhibits Overview: Card-based visual display of assets with their values.
 
-## Database and `instance/` Folder
+Acquisition Summary: Shows total asset value dynamically.
 
-- Flask-SQLAlchemy resolves `sqlite:///zephyr.db` to the Flask instance path.
-- Expected local DB file: `instance/zephyr.db` (project root).
-- If `instance/` is missing, create it before starting the app.
-- On startup, `db.create_all()` creates tables automatically if the DB file does not exist.
-- Deleting `instance/zephyr.db` resets persisted data (cards, balances, transactions).
+Role-Based Access: Officer, operator, technician, researcher, and admin.
 
-## Routes
+Real-Time Updates: Live updates via Socket.IO and MQTT.
 
-- `GET /`: Landing page
-- `GET /login`: Login selector
-- `GET /login/agent`: Agent login page
-- `POST /login/agent`: Agent authentication
-- `GET /login/sales`: Sales login page
-- `POST /login/sales`: Sales authentication
-- `GET /topup-dashboard`: Agent dashboard
-- `GET /payment-dashboard`: Sales dashboard
-- `GET /admin`: Admin page
-- `POST /topup`: Top-up transaction
-- `POST /pay`: Payment transaction
+System Status Monitoring: Online/offline system status indicators.
 
-## Local Setup
+Polished UI: Responsive dark theme with intuitive layout for quick insights.
 
-1. Go to the project root:
-```bash
-cd Payment
-```
+🗂 Project Structure
+Payment/
+├─ backend/
+│  ├─ app.py                # Flask app, routes, Socket.IO & MQTT integration
+│  ├─ instance/
+│  │  └─ kaliz.db           # SQLite database for assets & transactions
+│  └─ templates/
+│     ├─ dashboard.html     # Agent/Sales dashboard
+│     ├─ admin.html         # Admin data view
+│     ├─ login.html         # Main login selector
+│     ├─ agent_login.html   # Agent login page
+│     └─ sales_login.html   # Sales login page
+└─ ESP_RFID/
+   └─ ESP_RFID.ino          # ESP8266 + MFRC522 firmware for card scans
+⚙ Backend Behavior
 
-2. Create and activate a virtual environment:
-```bash
+Host / Port: 0.0.0.0:9243 (LAN access via http://<your-ip>:9243)
+
+Database: SQLite via Flask-SQLAlchemy (instance/kaliz.db)
+
+Automatic Table Creation: Tables auto-create at startup if missing
+
+Reset Data: Delete instance/kaliz.db to reset assets and transactions
+
+MQTT Broker: broker.benax.rw for real-time RFID card events
+
+🌐 Routes
+Method	Route	Description
+GET	/	Landing page
+GET	/login/agent	Agent login page
+POST	/login/agent	Agent authentication
+GET	/topup-dashboard	Agent dashboard (top-up flow)
+GET	/login/sales	Sales login page
+POST	/login/sales	Sales authentication
+GET	/payment-dashboard	Sales dashboard (payment flow)
+GET	/admin	Admin interface
+POST	/asset/add	Add a new asset
+POST	/asset/update	Update asset information
+POST	/asset/remove	Remove an asset
+🖥 Local Setup
+# Navigate to backend
+cd Payment/backend
+
+# Create & activate virtual environment
 python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows PowerShell
-```
+# Windows
+.venv\Scripts\activate
+# Linux/macOS
+source .venv/bin/activate
 
-3. Install dependencies:
-```bash
+# Install dependencies
 pip install -U pip
-pip install flask flask-socketio flask-cors flask-sqlalchemy paho-mqtt
-```
+pip install flask flask-sqlalchemy flask-cors flask-socketio paho-mqtt
 
-4. Run backend:
-```bash
-python backend/app.py
-```
+# Run backend server
+python app.py
 
-## Hardware Notes
+Dashboards:
 
-- Open `Payment/ESP_RFID/ESP_RFID.ino` in Arduino IDE.
-- Install libraries: `ESP8266WiFi`, `PubSubClient`, `MFRC522`, `ArduinoJson`.
-- Set Wi-Fi and team configuration, then flash the ESP8266.
+Agent: http://127.0.0.1:9243/topup-dashboard
 
-## Tech Stack
+Sales: http://127.0.0.1:9243/payment-dashboard
 
-- Backend: Flask, Flask-SocketIO, Flask-SQLAlchemy
-- Frontend: HTML, Tailwind CSS, JavaScript, Socket.IO
-- Messaging: MQTT
-- Database: SQLite
-- Hardware: ESP8266 + MFRC522
+🔌 Hardware Integration (Optional)
+
+Open ESP_RFID.ino in Arduino IDE.
+
+Install libraries: ESP8266WiFi, PubSubClient, MFRC522, ArduinoJson.
+
+Configure Wi-Fi & team ID, then flash ESP8266 for live RFID scanning.
+
+🛠 Tech Stack
+
+Backend: Flask, Flask-SocketIO, Flask-SQLAlchemy
+
+Frontend: HTML, Tailwind CSS, JavaScript
+
+Database: SQLite
+
+Messaging: MQTT (real-time card events)
+
+Hardware: ESP8266 + MFRC522 for RFID scanning
+
+⚡ Quick Start
+
+Clone & run in one line:
+
+git clone https://github.com/KALIXA22/KALIZ-III.git && cd KALIZ-III/Payment/backend && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && python app.py
+
+Open dashboards at http://127.0.0.1:9243/topup-dashboard (Agent) or http://127.0.0.1:9243/payment-dashboard (Sales)
