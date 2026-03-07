@@ -1,141 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEPHYR | Consolidated Archive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@200;400;600&family=JetBrains+Mono:wght@100&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --gold: #d4af37;
-            --gold-soft: #b89b5e;
-            --matte-black: #0d0d0d;
-            --border-white: rgba(255, 255, 255, 0.08);
-            --gold-glow: rgba(212, 175, 55, 0.3);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--matte-black); 
-            color: #d1d5db;
-            background-image: url("https://www.transparenttextures.com/patterns/dark-matter.png");
-            background-attachment: fixed;
-        }
+<title>KALIZ | Consolidated Archive</title>
 
-        .serif-display { font-family: 'Cormorant Garamond', serif; font-weight: 300; }
-        .mono-elegant { font-family: 'JetBrains Mono', monospace; letter-spacing: 0.2em; font-size: 0.65rem; }
-        .tabular { font-variant-numeric: tabular-nums; }
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-        /* --- THE BRILLIANT SHIMMER EFFECT --- */
-        .museum-card, .kpi-card {
-            position: relative;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.01);
-            border: 0.6px solid rgba(184, 155, 94, 0.5); /* Softer border */
-            backdrop-filter: blur(12px);
-            border-radius: 4px;
-            transition: all 0.5s ease;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;500;700&family=Poppins:wght@300;400;600&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
 
-        /* The Moving Metallic Streak (Brilliance) */
-        .museum-card::after, .kpi-card::after {
-            content: "";
-            position: absolute;
-            top: -150%;
-            left: -150%;
-            width: 400%;
-            height: 400%;
-            background: linear-gradient(
-                45deg,
-                transparent 45%,
-                rgba(212, 175, 55, 0.018) 48%,
-                rgba(255, 255, 255, 0.045) 50%,
-                rgba(212, 175, 55, 0.018) 52%,
-                transparent 55%
-            );
-            animation: metallic-shine 18s infinite linear;
-            pointer-events: none;
-            transform: rotate(25deg);
-        }
+<style>
 
-        @keyframes metallic-shine {
-            0% { transform: translateX(-50%) translateY(-50%) rotate(25deg); }
-            100% { transform: translateX(50%) translateY(50%) rotate(25deg); }
-        }
+:root{
+--accent:#4ecdc4;
+--accent-soft:#2ab7a9;
+--charcoal:#0b132b;
+--border-white:rgba(197,214,255,0.14);
+--accent-glow:rgba(42,183,169,0.35);
+}
 
-        .kpi-card {
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.02) 0%, rgba(0, 0, 0, 0.4) 100%);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+body{
+font-family:'Poppins',sans-serif;
+background-color:var(--charcoal);
+color:#e2e8f0;
+background-image:url("https://www.transparenttextures.com/patterns/dark-matter.png");
+background-attachment:fixed;
+}
 
-        .gold-underline {
-            position: relative;
-            display: inline-block;
-        }
-        .gold-underline::after {
-            content: '';
-            position: absolute;
-            width: 100%; height: 1px;
-            bottom: -4px; left: 0;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        }
+.serif-display{
+font-family:'Playfair Display',serif;
+font-weight:400;
+}
 
-        .btn-classic {
-            border: 1px solid var(--gold-soft);
-            color: var(--gold-soft);
-            transition: all 0.4s ease;
-            background: transparent;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-        }
-        .btn-classic:hover {
-            background: var(--gold-soft);
-            color: black;
-            box-shadow: 0 0 20px var(--gold-glow);
-        }
+.mono-elegant{
+font-family:'Space Mono',monospace;
+letter-spacing:.18em;
+font-size:.7rem;
+}
 
-        .table-container::-webkit-scrollbar { width: 2px; }
-        .table-container::-webkit-scrollbar-thumb { background: var(--gold-soft); }
+.tabular{
+font-variant-numeric:tabular-nums;
+}
 
-        tr { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
-        tr:hover { background: rgba(212, 175, 55, 0.04) !important; }
+.museum-card,
+.kpi-card{
+position:relative;
+overflow:hidden;
+background:rgba(255,255,255,0.02);
+border:1px solid var(--border-white);
+backdrop-filter:blur(12px);
+border-radius:4px;
+transition:.5s;
+}
 
-        .kpi-value { 
-            text-shadow: 0 0 8px rgba(212, 175, 55, 0.18);
-            color: white;
-        }
+.museum-card::after,
+.kpi-card::after{
+content:"";
+position:absolute;
+top:-150%;
+left:-150%;
+width:400%;
+height:400%;
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp 0.8s ease forwards; }
-    </style>
+background:linear-gradient(
+45deg,
+transparent 45%,
+rgba(78,205,196,0.05) 48%,
+ rgba(255,255,255,0.05) 50%,
+rgba(42,183,169,0.04) 52%,
+transparent 55%
+);
+
+animation:metallic-shine 18s infinite linear;
+pointer-events:none;
+transform:rotate(25deg);
+}
+
+@keyframes metallic-shine{
+0%{transform:translateX(-50%) translateY(-50%) rotate(25deg);}
+100%{transform:translateX(50%) translateY(50%) rotate(25deg);}
+}
+
+.kpi-card{
+background:linear-gradient(
+135deg,
+rgba(78,205,196,0.08) 0%,
+rgba(0,0,0,0.5) 100%
+);
+box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+.gold-underline{
+position:relative;
+display:inline-block;
+}
+
+.gold-underline::after{
+content:'';
+position:absolute;
+width:100%;
+height:1px;
+bottom:-4px;
+left:0;
+background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+
+.btn-classic{
+border:1px solid var(--accent-soft);
+color:var(--accent-soft);
+transition:.4s;
+background:transparent;
+text-transform:uppercase;
+letter-spacing:.15em;
+}
+
+.btn-classic:hover{
+background:var(--accent-soft);
+color:#061118;
+box-shadow:0 0 20px var(--accent-glow);
+}
+
+.table-container::-webkit-scrollbar{
+width:2px;
+}
+
+.table-container::-webkit-scrollbar-thumb{
+background:var(--accent-soft);
+}
+
+tr{
+transition:.3s;
+border-bottom:1px solid rgba(255,255,255,0.03);
+}
+
+tr:hover{
+background:rgba(78,205,196,0.10)!important;
+}
+
+.kpi-value{
+text-shadow:0 0 8px rgba(78,205,196,0.35);
+color:white;
+}
+
+.text-gold-soft{
+color:var(--accent-soft);
+}
+
+.bg-gold-soft\/10{
+background:rgba(42,183,169,0.12);
+}
+
+@keyframes fadeUp{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+.fade-up{
+animation:fadeUp .8s ease forwards;
+}
+
+</style>
 </head>
+
 <body class="min-h-screen pb-20">
 
-    <header class="w-full py-10 px-6 md:px-12 flex justify-between items-end border-b border-white/5 sticky top-0 z-20 bg-black/80 backdrop-blur-md">
-        <div>
-            <div class="flex items-center gap-3 mb-2">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-soft opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-gold-soft"></span>
-                </span>
-                <p class="mono-elegant text-gray-500">SECURE_VAULT_LIVE</p>
-            </div>
-            <h1 class="serif-display text-4xl tracking-[0.2em] text-white uppercase">Consolidated <span class="italic font-light text-gray-500">Archive</span></h1>
-        </div>
-        <div class="flex items-center gap-8 pb-1">
-            <a href="{% if session['role'] == 'agent' %}/topup-dashboard{% else %}/payment-dashboard{% endif %}" class="mono-elegant text-gray-500 hover:text-white transition-colors">
-                EXIT_TO_VAULT
-            </a>
-            <a href="/logout" class="btn-classic px-8 py-2 text-[10px]">Logout</a>
-        </div>
-    </header>
+<header class="w-full py-10 px-6 md:px-12 flex justify-between items-end border-b border-white/5 sticky top-0 z-20 bg-black/80 backdrop-blur-md">
 
+<div>
+
+<div class="flex items-center gap-3 mb-2">
+
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400"></span>
+</span>
+
+<p class="mono-elegant text-gray-500">
+SECURE_VAULT_LIVE
+</p>
+
+</div>
+
+<h1 class="serif-display text-4xl tracking-[0.2em] text-white uppercase">
+Consolidated <span class="italic font-light text-gray-400">Archive</span>
+</h1>
+
+</div>
+
+<div class="flex items-center gap-8 pb-1">
+
+<a href="{% if session['role'] == 'agent' %}/topup-dashboard{% else %}/payment-dashboard{% endif %}"
+class="mono-elegant text-gray-500 hover:text-white transition-colors">
+
+EXIT_TO_VAULT
+</a>
+
+<a href="/logout"
+class="btn-classic px-8 py-2 text-[10px]">
+
+Logout
+
+</a>
+
+</div>
+
+</header>
     <main class="container mx-auto px-6 md:px-12 mt-16 max-w-[1600px]">
         
         <section class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20 fade-up">
@@ -262,12 +334,12 @@
             doc.setFillColor(13, 13, 13);
             doc.rect(0, 0, 595, 842, 'F');
             
-            doc.setTextColor(212, 175, 55);
+            doc.setTextColor(78, 205, 196);
             doc.setFont('times', 'italic');
             doc.setFontSize(24);
-            doc.text('ZEPHYR HERITAGE ARCHIVE', 50, 60);
+            doc.text('KALIZ HERITAGE ARCHIVE', 50, 60);
             
-            doc.setDrawColor(184, 155, 94);
+            doc.setDrawColor(42, 183, 169);
             doc.line(50, 75, 545, 75);
 
             doc.setTextColor(150, 150, 150);
@@ -285,7 +357,7 @@
             logLine('AUTH_SIGNATURE', receipt.uid);
             logLine('VALUATION_RWF', `${receipt.type === 'TOP-UP' ? '+' : '-'}${Number(receipt.amount).toLocaleString()}`);
             
-            doc.save(`ZEPHYR_LOG_${receipt.transaction_id}.pdf`);
+            doc.save(`KALIZ_LOG_${receipt.transaction_id}.pdf`);
         }
 
         function downloadReceiptFromRow(buttonEl) {

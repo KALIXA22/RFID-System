@@ -10,7 +10,7 @@ const char* WIFI_PASS = "Meeting@2024";
 
 const char* MQTT_BROKER = "broker.benax.rw";
 const int MQTT_PORT = 1883;
-const char* TEAM_ID = "team_zephyr"; // Updated
+const char* TEAM_ID = "team_kaliz"; // Updated
 
 String CLIENT_ID = "ESP8266_" + String(TEAM_ID);
 String TOPIC_STATUS = "rfid/" + String(TEAM_ID) + "/card/status";

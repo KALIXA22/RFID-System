@@ -1,79 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEPHYR | Agent Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@200;400;600&family=JetBrains+Mono:wght@100&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --gold: #d4af37;
-            --gold-soft: #b89b5e;
-            --matte-black: #0d0d0d;
-            --border-white: rgba(255, 255, 255, 0.08);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--matte-black); 
-            color: #d1d5db;
-            background-image: url("https://www.transparenttextures.com/patterns/dark-matter.png");
-        }
+<title>ZEPHYR | Agent Login</title>
 
-        .serif-display { font-family: 'Cormorant Garamond', serif; font-weight: 300; }
-        .mono-elegant { font-family: 'JetBrains Mono', monospace; letter-spacing: 0.2em; font-size: 0.65rem; }
+<script src="https://cdn.tailwindcss.com"></script>
 
-        .museum-card {
-            background: rgba(255, 255, 255, 0.01);
-            border: 1px solid var(--border-white);
-        }
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;500;700&family=Poppins:wght@300;400;600&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
 
-        .btn-classic {
-            border: 1px solid var(--gold-soft);
-            color: var(--gold-soft);
-            transition: all 0.4s ease;
-            background: transparent;
-        }
-        .btn-classic:hover {
-            background: var(--gold-soft);
-            color: black;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-        }
-    </style>
+<style>
+
+:root{
+--gold:#e6c77a;
+--gold-soft:#d6b96b;
+--charcoal:#121212;
+--border-white:rgba(255,255,255,0.06);
+}
+
+body{
+font-family:'Poppins',sans-serif;
+background-color:var(--charcoal);
+color:#e5e7eb;
+background-image:url("https://www.transparenttextures.com/patterns/dark-matter.png");
+}
+
+.serif-display{
+font-family:'Playfair Display',serif;
+font-weight:400;
+}
+
+.mono-elegant{
+font-family:'Space Mono',monospace;
+letter-spacing:0.18em;
+font-size:0.7rem;
+}
+
+.museum-card{
+background:rgba(255,255,255,0.02);
+border:1px solid var(--border-white);
+}
+
+.btn-classic{
+border:1px solid var(--gold-soft);
+color:var(--gold-soft);
+transition:all .4s ease;
+background:transparent;
+}
+
+.btn-classic:hover{
+background:var(--gold-soft);
+color:black;
+box-shadow:0 0 20px rgba(230,199,122,.25);
+}
+
+.input-style{
+background:transparent;
+border-bottom:1px solid rgba(255,255,255,0.1);
+padding:12px 0;
+font-size:18px;
+color:white;
+font-family:'Playfair Display',serif;
+transition:all .3s ease;
+}
+
+.input-style:focus{
+outline:none;
+border-color:var(--gold-soft);
+}
+
+</style>
 </head>
+
 <body class="min-h-screen flex items-center justify-center">
 
-    <div class="w-full max-w-md">
-        
-        <header class="text-center mb-10">
-            <h1 class="serif-display text-4xl tracking-widest text-white uppercase">Agent Portal</h1>
-            <p class="mono-elegant text-gray-600 mt-2">TOP-UP_OPERATIONS</p>
-        </header>
+<div class="w-full max-w-md">
 
-        <main class="museum-card p-10 rounded-sm">
-            <form method="POST" action="/login/agent" class="space-y-8">
-                <div>
-                    <label for="agent-username" class="mono-elegant text-gray-600 block mb-4 uppercase">Agent ID</label>
-                    <input type="text" id="agent-username" name="username" value="agent" required
-                        class="w-full bg-transparent border-b border-white/10 py-3 text-lg serif-display focus:outline-none focus:border-gold-soft text-white transition-all">
-                </div>
+<header class="text-center mb-10">
 
-                <div>
-                    <label for="agent-password" class="mono-elegant text-gray-600 block mb-4 uppercase">Password</label>
-                    <input type="password" id="agent-password" name="password" value="agentpass" required
-                        class="w-full bg-transparent border-b border-white/10 py-3 text-lg serif-display focus:outline-none focus:border-gold-soft text-white transition-all">
-                </div>
+<h1 class="serif-display text-4xl tracking-widest text-white uppercase">
+Agent Portal
+</h1>
 
-                <div class="pt-6">
-                    <button type="submit" 
-                        class="w-full btn-classic py-4 serif-display italic text-xl tracking-widest">
-                        Authenticate
-                    </button>
-                </div>
-            </form>
-        </main>
-    </div>
+<p class="mono-elegant text-gray-500 mt-2">
+TOP-UP_OPERATIONS
+</p>
+
+</header>
+
+<main class="museum-card p-10 rounded-sm">
+
+<form method="POST" action="/login/agent" class="space-y-8">
+
+<div>
+
+<label for="agent-username"
+class="mono-elegant text-gray-500 block mb-4 uppercase">
+Agent ID
+</label>
+
+<input
+type="text"
+id="agent-username"
+name="username"
+value="agent"
+required
+class="w-full input-style">
+
+</div>
+
+<div>
+
+<label for="agent-password"
+class="mono-elegant text-gray-500 block mb-4 uppercase">
+Password
+</label>
+
+<input
+type="password"
+id="agent-password"
+name="password"
+value="agentpass"
+required
+class="w-full input-style">
+
+</div>
+
+<div class="pt-6">
+
+<button
+type="submit"
+class="w-full btn-classic py-4 serif-display italic text-xl tracking-widest">
+
+Authenticate
+
+</button>
+
+</div>
+
+</form>
+
+</main>
+
+</div>
 
 </body>
 </html>
