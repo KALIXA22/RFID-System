@@ -4,10 +4,6 @@ Zephyr is a real-time RFID payment platform with an ESP8266 reader, Flask backen
 
 ## LIVE ACCESS URL
 
-### **[http://157.173.101.159:9224/](http://157.173.101.159:9224/)**
-
-Frontend Link: http://157.173.101.159:9224/
-
 ## Features
 
 - Real-time RFID card scan updates over MQTT + Socket.IO.
@@ -78,9 +74,6 @@ pip install flask flask-socketio flask-cors flask-sqlalchemy paho-mqtt
 ```bash
 python backend/app.py
 ```
-
-5. Open in browser:
-- `http://157.173.101.159:9224/`
 
 ## Hardware Notes
 
