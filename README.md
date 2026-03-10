@@ -65,10 +65,8 @@ POST	/asset/remove	Remove an asset
 cd Payment/backend
 
 # Create & activate virtual environment
-python -m venv .venv
-# Windows
+python3 -m venv .venv
 .venv\Scripts\activate
-# Linux/macOS
 source .venv/bin/activate
 
 # Install dependencies
